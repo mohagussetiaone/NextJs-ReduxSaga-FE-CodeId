@@ -1,23 +1,33 @@
+import React, { useState, useEffect } from "react";
 import { useFormik } from "formik";
-import React, { useState } from "react";
-import { useDispatch } from "react-redux";
-import { AddRegionRequest } from "../redux-saga/action/regionAction";
+import { useDispatch, useSelector } from "react-redux";
+import { EditRegionRequest, FindRegionRequest } from "../redux-saga/action/regionAction";
 
-export default function RegionFormikCreate(props: any) {
+export default function FormikRegionUpdate(props: any) {
   const dispatch = useDispatch();
+  const { region } = useSelector((state: any) => state.regionState);
   const [previewImg, setPreviewImg] = useState<any>();
   const [upload, setUpload] = useState<any>(false);
+
+  useEffect(() => {
+    dispatch(FindRegionRequest(props.id));
+  }, []);
+
   const formik = useFormik({
+    enableReinitialize: true,
     initialValues: {
-      name: "",
-      file: "",
+      id: props.id,
+      name: region.regionName,
+      file: region.regionPhoto,
     },
+
     onSubmit: async (values: any) => {
       let payload = new FormData();
+      payload.append("id", values.id);
       payload.append("name", values.name);
       payload.append("file", values.file);
 
-      dispatch(AddRegionRequest(payload));
+      dispatch(EditRegionRequest(payload));
       props.setDisplay(false);
       window.alert("Data Successfully Insert");
       props.setRefresh(true);
